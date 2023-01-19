@@ -1,32 +1,37 @@
-/* eslint-disable no-console */
-const express = require("express");
+// server.js
+const { createServer } = require("http");
+const { parse } = require("url");
 const next = require("next");
 
-const NODE_ENV = "production"; //development
-const PORT = 3000;
-
-const port = parseInt(PORT, 10) || 3000;
-const app = next({
-  dir: ".", // base directory where everything is, could move to src later
-});
-
+const dev = process.env.NODE_ENV !== "production";
+const hostname = "localhost";
+const port = 3000;
+// when using middleware `hostname` and `port` must be provided below
+const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-let server;
-app
-  .prepare()
-  .then(() => {
-    server = express();
-    // Default catch-all handler to allow Next.js to handle all other routes
-    server.all("*", (req, res) => handle(req, res));
-    server.listen(port, (err) => {
-      if (err) {
-        throw err;
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
+      // Be sure to pass `true` as the second argument to `url.parse`.
+      // This tells it to parse the query portion of the URL.
+      const parsedUrl = parse(req.url, true);
+      const { pathname, query } = parsedUrl;
+
+      if (pathname === "/a") {
+        await app.render(req, res, "/a", query);
+      } else if (pathname === "/b") {
+        await app.render(req, res, "/b", query);
+      } else {
+        await handle(req, res, parsedUrl);
       }
-      console.log(`> Ready on port ${port} [${NODE_ENV}]`);
-    });
-  })
-  .catch((err) => {
-    console.log("An error occurred, unable to start the server");
-    console.log(err);
+    } catch (err) {
+      console.error("Error occurred handling", req.url, err);
+      res.statusCode = 500;
+      res.end("internal server error");
+    }
+  }).listen(port, (err) => {
+    if (err) throw err;
+    console.log(`> Ready on http://${hostname}:${port}`);
   });
+});
