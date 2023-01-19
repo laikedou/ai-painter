@@ -3,9 +3,9 @@ const express = require("express");
 const next = require("next");
 
 const NODE_ENV = "production"; //development
-const PORT = 8019;
+const PORT = 3000;
 
-const port = parseInt(PORT, 10) || 8019;
+const port = parseInt(PORT, 10) || 3000;
 const app = next({
   dir: ".", // base directory where everything is, could move to src later
 });
