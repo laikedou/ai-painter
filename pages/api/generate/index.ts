@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import nc from "next-connect";
 import fetch, { Response } from "node-fetch";
-import { createCanvas, loadImage, Image } from "canvas";
+import { createCanvas, loadImage, Image, registerFont } from "canvas";
 import QRCode from "qrcode";
+import * as path from "path";
 //背景图片
 const BG_URL =
   "https://mp-58baf90f-31bb-444b-8730-fac0c723b4f1.cdn.bspapp.com/cloudstorage/7f84ae45-0392-4939-92d0-a98043060493.jpg";
@@ -25,7 +26,10 @@ const handler = nc<NextApiRequest, NextApiResponse>();
 handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("get method req.query", req.query, typeof req.query);
   const { contents } = req.query;
-
+  //先注册字体否则可能会乱码
+  registerFont(path.resolve("./fonts/NotoSansSC-Regular.otf"), {
+    family: "Noto",
+  });
   //先生成qrcode
   try {
     //进行海报的绘制功能 如果在客户端生成其实很慢还有兼容性问题他
@@ -52,11 +56,11 @@ handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
       20,
       HEIGHT - INFO_HEIGHT / 2 - BOTTOM_HEIGHT - 20,
       "#FFFFFF",
-      "bold 20px Impact",
+      "bold 20px Noto",
       1
     );
     //写入作者是谁
-    ctx.font = "bold 14px Impact";
+    ctx.font = "bold 14px Noto";
     ctx.fillStyle = "#999";
     ctx.textAlign = "center";
     ctx.fillText(AUTHOUR, WIDTH / 2, HEIGHT - BOTTOM_HEIGHT - 15, WIDTH - 40);
@@ -72,7 +76,7 @@ handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
 
     // logo title and tips
     ctx.textAlign = "left";
-    ctx.font = "18px Impact";
+    ctx.font = "18px Noto";
     ctx.fillStyle = "#ffffff";
     ctx.fillText(
       LOGO_TITLE,
@@ -80,7 +84,7 @@ handler.get(async (req: NextApiRequest, res: NextApiResponse) => {
       HEIGHT - BOTTOM_HEIGHT + BOTTOM_HEIGHT / 2 + 7
     );
 
-    ctx.font = "14px Impact";
+    ctx.font = "14px Noto";
     ctx.fillStyle = "#ffffff";
 
     ctx.fillText(
